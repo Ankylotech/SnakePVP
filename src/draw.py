@@ -2,20 +2,17 @@ import pygame
 
 from snake_types import Vector
 
-global rect_width
-global rect_height
+global sq_size
 player_name_images = {}
 font = None
 background_color = [0, 0, 30]
 
 
-def init(players, width, height):
+def init(players, size):
     global font
-    global rect_width
-    global rect_height
+    global sq_size
 
-    rect_width = width
-    rect_height = height
+    sq_size = size
 
     font = pygame.font.SysFont("monospace", 20, bold=True)
 
@@ -29,29 +26,35 @@ def draw(players, obstacles, collectable, screen):
     for player in players:
         draw_snake(player, screen)
 
+    draw_collectables(collectable,screen)
+
     draw_information(players, Vector(10, 10), screen)
     pygame.display.flip()
 
 
 def draw_snake(player, screen):
-    global rect_width
-    global rect_height
+    global sq_size
     for pos in player.snake.positions:
-        r = pygame.Rect((pos.x * rect_width, pos.y * rect_height)
-                        , (rect_width, rect_height))
+        r = pygame.Rect((pos.x * sq_size, pos.y * sq_size)
+                        , (sq_size, sq_size))
         color = player.color
         pygame.draw.rect(screen, color, r)
 
 
 def draw_obstacles(obstacles, screen):
-    global rect_width
-    global rect_height
+    global sq_size
     for obstacle in obstacles:
         x, y = obstacle.x, obstacle.y
-        r = pygame.Rect((x * rect_width, y * rect_height)
-                        , (rect_width, rect_height))
+        r = pygame.Rect((x * sq_size, y * sq_size)
+                        , (sq_size, sq_size))
         color = [255, 0, 0]
         pygame.draw.rect(screen, color, r)
+
+
+def draw_collectables(collectables, screen):
+    global sq_size
+    for collectable in collectables:
+        pygame.draw.circle(screen, collectable.color, (collectable.position.x * sq_size + sq_size / 2, collectable.position.y * sq_size + sq_size / 2), sq_size/2)
 
 
 def draw_text(text, color, pos, screen, center=True):

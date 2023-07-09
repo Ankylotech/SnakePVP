@@ -41,6 +41,9 @@ class Vector:
     def __truediv__(self, divisor):
         return self * (1 / divisor)
 
+    def __eq__(self, other):
+        return self.x == other.x and self.y == other.y
+
     def dot(self, other):
         return (self.x * other.x + self.y * other.y)
 
@@ -53,6 +56,16 @@ class Vector:
             return Vector(0, 0)
         else:
             return Vector(self.x / norm, self.y / norm)
+
+    def add_direction(self, direction):
+        if direction == Direction.UP:
+            return self + Vector(0,-1)
+        elif direction == Direction.DOWN:
+            return self + Vector(0,1)
+        elif direction == Direction.LEFT:
+            return self + Vector(-1,0)
+        else:
+            return self + Vector(1,0)
 
     def rotated(self):
         return Vector(-self.y, self.x)
@@ -72,23 +85,15 @@ class Snake:
         self.lengthen = 0
 
     def move(self, width, height):
-        head = Vector(self.positions[0].x,self.positions[0].y)
-        if self.direction == Direction.UP:
-            head.y -= 1
-            if head.y < 0:
-                head.y = height - 1
-        elif self.direction == Direction.DOWN:
-            head.y += 1
-            if head.y == height:
-                head.y = 0
-        elif self.direction == Direction.LEFT:
-            head.x -= 1
-            if head.x < 0:
-                head.x = width - 1
-        else:
-            head.x += 1
-            if head.x == width:
-                head.x = 0
+        head = Vector(self.positions[0].x,self.positions[0].y).add_direction(self.direction)
+        if head.y < 0:
+            head.y = height - 1
+        if head.y == height:
+            head.y = 0
+        if head.x < 0:
+            head.x = width - 1
+        if head.x == width:
+            head.x = 0
 
         self.positions = [head] + self.positions
         if self.lengthen == 0:
@@ -106,7 +111,9 @@ class Player:
 
 
 class Collectable:
-    additive = 1
+    additive = 0
+    multiplicative = 1
+    color = [0,0,0]
 
     def __init__(self, world):
         self.position = world.random_free()
@@ -118,8 +125,10 @@ class Collectable:
     def collect(self, world):
         self.new_position(world)
         self.effect += self.additive
+        self.effect *= self.multiplicative
         return self.effect
 
 
 class Apple(Collectable):
     additive = 5
+    color = [0,255,0]

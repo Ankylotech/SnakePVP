@@ -3,6 +3,7 @@ import importlib
 import os
 import sys
 import traceback
+import types
 
 import pygame
 
@@ -24,17 +25,16 @@ def start():
     pygame.init()
     pygame.event.set_allowed([pygame.QUIT])
     dimensions = (800, 800)
-    rect_width = 16
-    rect_height = 16
+    sq_size = 16
     screen = pygame.display.set_mode(dimensions)
     clock = pygame.time.Clock()
     random.seed(43)
 
     players = load_players()
 
-    world = World(players, dimensions[0] / rect_width, dimensions[1] / rect_height)
+    world = World(players, dimensions[0] / sq_size, dimensions[1] / sq_size)
 
-    draw.init(world.players, rect_width, rect_height)
+    draw.init(world.players, sq_size)
 
     game_loop(world)
 
@@ -43,14 +43,12 @@ def load_players():
     players = []
 
     if len(sys.argv) <= 1:
-        for search_path in ("", "./src/ais/"):
+        for search_path in ("", "ais/"):
             for filename in glob.glob(search_path + "ai*.py"):
-                print(filename)
                 players.append(load_player(filename))
     else:
         for filename in sys.argv[1:]:
             players.append(load_player(filename))
-    print(players)
     return players
 
 
@@ -72,7 +70,7 @@ def load_ai(filename):
         if code.startswith("#bot"):
             prelude = []
             lines = code.split("\n")
-            seekerdef = ["def decide(mySnake, other_snakes, obstacles, collectables, world):"]
+            seekerdef = ["from snake_types import *","def decide(mySnake, other_snakes, obstacles, collectables, world):"]
             seekerret = ["return mySnake.direction"]
             lines = seekerdef + indent(prelude + lines[1:] + seekerret)
             return "\n".join(lines)
@@ -82,21 +80,16 @@ def load_ai(filename):
     try:
         with open(filename, "r") as f:
             code = mogrify(f.read())
-            mod = importlib.import_module(filename[:-3], 'snake')
+            mod = types.ModuleType(filename[:-3])
             mod_dict = mod.__dict__
             exec(code, mod_dict)
             ai = mod.decide
-            ai.is_dummy = False
     except Exception:
         print("**********************************************************", file=sys.stderr)
         traceback.print_exc(file=sys.stderr)
         print("", file=sys.stderr)
 
         ai = dummy_decide
-        ai.is_dummy = True
-
-    ai.filename = filename
-    ai.timestamp = os.path.getctime(filename)
 
     return ai
 
@@ -105,12 +98,15 @@ def game_loop(world):
     global screen
     global quit
     global clock
-
-    while not quit:
+    step = 0
+    print(quit)
+    while not quit and step <= 1000:
         handle_events()
         world.update()
         world.draw(screen)
         clock.tick(10)
+        step += 1
+    print("the winner is: " + world.get_winner())
 
 
 def handle_events():
