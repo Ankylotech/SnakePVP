@@ -1,5 +1,7 @@
 import draw
 import copy
+import traceback
+import sys
 from snake_types import *
 
 
@@ -8,10 +10,15 @@ class World:
         self.width = width
         self.height = height
         self.obstacles = []
+        self.portals = []
         self.players = players
-        self.collectables = []
+        self.boni = []
         self.obstacles = self.generate_obstacles()
-        self.collectables.append(Apple(self))
+        self.portals = self.generate_portals(2)
+        self.boni.append(Apple(self))
+        self.boni.append(Cherry(self))
+        self.boni.append(Banana(self))
+        self.boni.append(Diamond(self))
         for p in players:
             self.position_player(p)
 
@@ -28,6 +35,14 @@ class World:
             list.append(self.random_free())
 
         return list
+
+    def generate_portals(self, num):
+        result = []
+        for _ in range(num):
+            pos1 = self.random_free()
+            pos2 = self.random_free()
+            result.append(Portal(pos1, pos2))
+        return result
 
     def position_player(self, player):
         pos = self.random_free()
@@ -53,13 +68,21 @@ class World:
                     return True
         return False
 
-    def occupied(self, pos):
-        if self.obstacle(pos):
-            return True
-        for collectable in self.collectables:
-            if collectable is pos:
+    def portal(self,pos):
+        for portal in self.portals:
+            if portal.position1 is pos or portal.position2 is pos:
                 continue
-            if collectable.position == pos:
+            if portal.position1 == pos or portal.position2 == pos:
+                return True
+        return False
+
+    def occupied(self, pos):
+        if self.obstacle(pos) or self.portal(pos):
+            return True
+        for bonus in self.boni:
+            if bonus is pos:
+                continue
+            if bonus.position == pos:
                 return True
         return False
 
@@ -67,13 +90,29 @@ class World:
         for player in self.players:
             otherSnakes = copy.deepcopy([p.snake for p in self.players if p is not player])
             world = copy.deepcopy(self)
-            direction = player.ai(copy.deepcopy(player.snake), otherSnakes, world.obstacles, world.collectables, world)
+            try:
+                direction = player.ai(copy.deepcopy(player.snake), otherSnakes, world.obstacles, world.boni, world)
+            except Exception as e:
+                print("The AI of Player "
+                      + player.name
+                      + " raised an exception:")
+                traceback.print_exc(file=sys.stderr)
+                direction = player.snake.direction
             player.snake.direction = Direction(direction)
 
     def update(self):
         self.ai_calcs()
         for player in self.players:
             player.snake.move(self.width, self.height)
+
+        for player in self.players:
+            position = player.snake.positions[0]
+            for portal in self.portals:
+                if position == portal.position1:
+                    player.snake.positions[0] = copy.copy(portal.position2)
+                if position == portal.position2:
+                    player.snake.positions[0] = copy.copy(portal.position1)
+
         reset = []
         for player in self.players:
             if self.obstacle(player.snake.positions[0]):
@@ -83,15 +122,27 @@ class World:
             player.score = int(player.score / 3)
             self.position_player(player)
 
+        reverse = 0
         for player in self.players:
-            for collect in self.collectables:
-                if player.snake.positions[0] == collect.position:
-                    value = collect.collect(self)
-                    player.score += value
-                    player.snake.lengthen = math.ceil(value/10)
+            for bonus in self.boni:
+                if player.snake.positions[0] == bonus.position:
+                    value, effect = bonus.collect(self)
+                    if effect == Effect.REGULAR:
+                        player.score += value
+                        player.snake.lengthen = math.ceil(value/10)
+                    elif effect == Effect.HALF:
+                        player.score += value
+                        mid = math.ceil(len(player.snake.positions)/2)
+                        player.snake.positions = player.snake.positions[:mid]
+                    elif effect == Effect.REVERSE:
+                        reverse += 1
+
+        if reverse % 2 == 1:
+            for player in self.players:
+                player.snake.positions.reverse()
 
     def draw(self, screen):
-        draw.draw(self.players, self.obstacles, self.collectables, screen)
+        draw.draw(self.players, self.obstacles, self.boni,self.portals, screen)
 
     def get_winner(self):
         max = self.players[0].score

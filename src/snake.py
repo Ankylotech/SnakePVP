@@ -14,8 +14,8 @@ from world import World
 
 global screen
 global clock
-global quit
-quit = False
+global done
+done = False
 
 
 def start():
@@ -24,11 +24,11 @@ def start():
 
     pygame.init()
     pygame.event.set_allowed([pygame.QUIT])
-    dimensions = (800, 800)
-    sq_size = 16
+    dimensions = (960, 960)
+    sq_size = 32
     screen = pygame.display.set_mode(dimensions)
     clock = pygame.time.Clock()
-    random.seed(43)
+    random.seed(44)
 
     players = load_players()
 
@@ -60,7 +60,7 @@ def load_player(filename):
 
 
 def load_ai(filename):
-    def dummy_decide(mySnake, other_snakes, obstacles, collectables, world):
+    def dummy_decide(mySnake, other_snakes, obstacles, boni, world):
         return Direction.UP
 
     def indent(lines):
@@ -70,7 +70,7 @@ def load_ai(filename):
         if code.startswith("#bot"):
             prelude = []
             lines = code.split("\n")
-            seekerdef = ["from snake_types import *","def decide(mySnake, other_snakes, obstacles, collectables, world):"]
+            seekerdef = ["from snake_types import *","def decide(mySnake, other_snakes, obstacles, boni, world):"]
             seekerret = ["return mySnake.direction"]
             lines = seekerdef + indent(prelude + lines[1:] + seekerret)
             return "\n".join(lines)
@@ -96,17 +96,17 @@ def load_ai(filename):
 
 def game_loop(world):
     global screen
-    global quit
+    global done
     global clock
     step = 0
-    print(quit)
-    while not quit and step <= 1000:
+    while not done and step <= 1000:
         handle_events()
         world.update()
         world.draw(screen)
         clock.tick(10)
         step += 1
     print("the winner is: " + world.get_winner())
+    pygame.quit()
 
 
 def handle_events():
@@ -116,8 +116,8 @@ def handle_events():
 
 def handle_event(e):
     if e.type == pygame.QUIT:
-        global quit
-        quit = True
+        global done
+        done = True
 
 
 start()

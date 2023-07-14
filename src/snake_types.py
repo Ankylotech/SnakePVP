@@ -110,25 +110,53 @@ class Player:
         self.snake = Snake([], Direction.UP)
 
 
-class Collectable:
+class Effect(Enum):
+    REGULAR, HALF, REVERSE = range(3)
+
+
+class Bonus:
     additive = 0
     multiplicative = 1
-    color = [0,0,0]
+    color = [0, 0, 0]
+    effect = Effect.REGULAR
 
     def __init__(self, world):
         self.position = world.random_free()
-        self.effect = 1
+        self.score = 1
 
     def new_position(self, world):
         self.position = world.random_free()
 
     def collect(self, world):
         self.new_position(world)
-        self.effect += self.additive
-        self.effect *= self.multiplicative
-        return self.effect
+        self.score += self.additive
+        self.score *= self.multiplicative
+        return int(self.score), self.effect
 
 
-class Apple(Collectable):
-    additive = 5
+class Apple(Bonus):
+    additive = 4
     color = [0,255,0]
+
+
+class Cherry(Bonus):
+    multiplicative = 1.25
+    color = [255, 0, 0]
+
+
+class Banana(Bonus):
+    multiplicative = 1.1
+    color = [255, 255, 0]
+    effect = Effect.HALF
+
+
+class Diamond(Bonus):
+    multiplicative = 0
+    color = [200, 200, 255]
+    effect = Effect.REVERSE
+
+
+class Portal:
+    def __init__(self, position1, position2):
+        self.position1 = position1
+        self.position2 = position2
