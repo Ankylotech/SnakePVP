@@ -1,8 +1,13 @@
-import draw
 import copy
-import traceback
 import sys
+import traceback
+
+import pygame
+
+import draw
 from snake_types import *
+
+global done
 
 
 class World:
@@ -44,9 +49,15 @@ class World:
             result.append(Portal(pos1, pos2))
         return result
 
+    def right(self, pos1, n):
+        result = pos1 + Vector(n, 0)
+        result.x %= self.width
+        return result
+
     def position_player(self, player):
         pos = self.random_free()
-        while self.occupied(pos + Vector(1, 0)) or self.occupied(pos + Vector(2, 0)) or self.occupied(pos + Vector(3, 0)) or self.occupied(pos + Vector(4, 0)):
+        while self.occupied(self.right(pos, 1)) or self.occupied(self.right(pos, 2)) or self.occupied(
+                self.right(pos, 3)) or self.occupied(self.right(pos, 4)):
             pos = self.random_free()
         player.snake.positions = [pos]
         player.snake.direction = Direction.RIGHT
@@ -68,7 +79,7 @@ class World:
                     return True
         return False
 
-    def portal(self,pos):
+    def portal(self, pos):
         for portal in self.portals:
             if portal.position1 is pos or portal.position2 is pos:
                 continue
@@ -100,7 +111,7 @@ class World:
                 direction = player.snake.direction
             player.snake.direction = Direction(direction)
 
-    def update(self):
+    def update(self, tick):
         self.ai_calcs()
         for player in self.players:
             player.snake.move(self.width, self.height)
@@ -126,13 +137,13 @@ class World:
         for player in self.players:
             for bonus in self.boni:
                 if player.snake.positions[0] == bonus.position:
-                    value, effect = bonus.collect(self)
+                    value, effect = bonus.collect(self, tick)
                     if effect == Effect.REGULAR:
                         player.score += value
-                        player.snake.lengthen = math.ceil(value/10)
+                        player.snake.lengthen = math.ceil(value / 10)
                     elif effect == Effect.HALF:
                         player.score += value
-                        mid = math.ceil(len(player.snake.positions)/2)
+                        mid = math.ceil(len(player.snake.positions) / 2)
                         player.snake.positions = player.snake.positions[:mid]
                     elif effect == Effect.REVERSE:
                         reverse += 1
@@ -142,7 +153,7 @@ class World:
                 player.snake.positions.reverse()
 
     def draw(self, screen):
-        draw.draw(self.players, self.obstacles, self.boni,self.portals, screen)
+        draw.draw(self.players, self.obstacles, self.boni, self.portals, screen)
 
     def get_winner(self):
         max = self.players[0].score
@@ -152,3 +163,32 @@ class World:
                 max = player.score
                 win = player.name
         return win
+
+    def simulate(self):
+        step = 0
+        while step < 1000:
+            self.update(step)
+            step += 1
+
+    def simulate_and_show(self, screen, clock, size):
+        global done
+        done = False
+        draw.init(self.players, size)
+        step = 0
+        while not done and step <= 1000:
+            handle_events()
+            self.update(step)
+            self.draw(screen)
+            clock.tick(10)
+            step += 1
+
+
+def handle_events():
+    for e in pygame.event.get():
+        handle_event(e)
+
+
+def handle_event(e):
+    if e.type == pygame.QUIT:
+        global done
+        done = True

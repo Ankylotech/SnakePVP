@@ -4,7 +4,7 @@ import random
 # assign a nice color to a string by hashing it
 def string_hash_color(string):
     original_state = random.getstate()
-    random.seed(string.encode())
+    random.seed(sum(string.encode()))
     hue = random.uniform(0, 1)
     random.setstate(original_state)
     return hue_color(hue)

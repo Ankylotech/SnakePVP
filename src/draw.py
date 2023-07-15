@@ -7,9 +7,11 @@ from snake_types import Vector
 global sq_size
 global orange_portal
 global blue_portal
+global portal_num
 player_name_images = {}
 font = None
 background_color = [0, 0, 30]
+green = pygame.Color(0, 255, 0)
 
 
 def replace(image, color1, color2):
@@ -21,7 +23,7 @@ def replace(image, color1, color2):
             if color1 == c:
                 result.set_at((x, y), color2)
             else:
-                result.set_at((x,y), pygame.Color(0,0,0,0))
+                result.set_at((x, y), pygame.Color(0, 0, 0, 0))
     return result
 
 
@@ -30,14 +32,15 @@ def init(players, size):
     global sq_size
     global orange_portal
     global blue_portal
+    global portal_num
 
+    portal_num = 0
     sq_size = size
-    portal = pygame.transform.scale(pygame.image.load('../images/portal.png'),(size,size))
-    green = pygame.Color(0,255,0)
-    orange = pygame.Color(255,127,0)
-    blue = pygame.Color(0,20,255)
+    portal = pygame.transform.scale(pygame.image.load('../images/portal.png'), (size, size))
+    orange = pygame.Color(255, 127, 0)
+    blue = pygame.Color(0, 20, 255)
     orange_portal = replace(portal, green, orange)
-    blue_portal = replace(portal,green, blue)
+    blue_portal = replace(portal, green, blue)
     font = pygame.font.SysFont("monospace", 20, bold=True)
 
     for p in players:
@@ -53,7 +56,7 @@ def draw(players, obstacles, boni, portals, screen):
     draw_boni(boni, screen)
 
     for portal in portals:
-        draw_portal(portal,screen)
+        draw_portal(portal, screen)
 
     draw_information(players, Vector(10, 10), screen)
     pygame.display.flip()
@@ -81,15 +84,24 @@ def draw_obstacles(obstacles, screen):
 def draw_boni(boni, screen):
     global sq_size
     for bonus in boni:
-        pygame.draw.circle(screen, bonus.color, (bonus.position.x * sq_size + sq_size / 2, bonus.position.y * sq_size + sq_size / 2), sq_size / 2)
+        pygame.draw.circle(screen, bonus.color,
+                           (bonus.position.x * sq_size + sq_size / 2, bonus.position.y * sq_size + sq_size / 2),
+                           sq_size / 2)
 
 
 def draw_portal(portal, screen):
     global orange_portal
     global blue_portal
     global sq_size
-    screen.blit(orange_portal, (portal.position1.x * sq_size, portal.position1.y * sq_size))
-    screen.blit(blue_portal, (portal.position2.x * sq_size, portal.position2.y * sq_size))
+    global portal_num
+    if portal_num == 0:
+        screen.blit(orange_portal, (portal.position1.x * sq_size, portal.position1.y * sq_size))
+        screen.blit(orange_portal, (portal.position2.x * sq_size, portal.position2.y * sq_size))
+        portal_num += 1
+    else:
+        screen.blit(blue_portal, (portal.position1.x * sq_size, portal.position1.y * sq_size))
+        screen.blit(blue_portal, (portal.position2.x * sq_size, portal.position2.y * sq_size))
+        portal_num = 0
 
 
 def draw_text(text, color, pos, screen, center=True):

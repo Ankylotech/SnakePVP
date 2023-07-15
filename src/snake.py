@@ -1,42 +1,38 @@
 import glob
-import importlib
-import os
 import sys
 import traceback
 import types
 
 import pygame
 
-import draw
+
 import utils
 from snake_types import *
-from world import World
+from tournament import Tournament
 
 global screen
 global clock
-global done
-done = False
+global dimensions
+sq_size = 32
 
 
 def start():
     global screen
     global clock
+    global dimensions
 
     pygame.init()
     pygame.event.set_allowed([pygame.QUIT])
     dimensions = (960, 960)
-    sq_size = 32
     screen = pygame.display.set_mode(dimensions)
     clock = pygame.time.Clock()
-    random.seed(44)
+    # random.seed(44)
 
     players = load_players()
 
-    world = World(players, dimensions[0] / sq_size, dimensions[1] / sq_size)
+    tournament = Tournament(players)
 
-    draw.init(world.players, sq_size)
-
-    game_loop(world)
+    game_loop(tournament)
 
 
 def load_players():
@@ -70,7 +66,7 @@ def load_ai(filename):
         if code.startswith("#bot"):
             prelude = []
             lines = code.split("\n")
-            seekerdef = ["from snake_types import *","def decide(mySnake, other_snakes, obstacles, boni, world):"]
+            seekerdef = ["from snake_types import *", "def decide(mySnake, other_snakes, obstacles, boni, world):"]
             seekerret = ["return mySnake.direction"]
             lines = seekerdef + indent(prelude + lines[1:] + seekerret)
             return "\n".join(lines)
@@ -85,6 +81,7 @@ def load_ai(filename):
             exec(code, mod_dict)
             ai = mod.decide
     except Exception:
+        print(filename)
         print("**********************************************************", file=sys.stderr)
         traceback.print_exc(file=sys.stderr)
         print("", file=sys.stderr)
@@ -94,30 +91,13 @@ def load_ai(filename):
     return ai
 
 
-def game_loop(world):
+def game_loop(tournament):
     global screen
-    global done
     global clock
-    step = 0
-    while not done and step <= 1000:
-        handle_events()
-        world.update()
-        world.draw(screen)
-        clock.tick(10)
-        step += 1
-    print("the winner is: " + world.get_winner())
+    global dimensions
+    winner = tournament.play_tournament(screen,clock, dimensions[0] / sq_size, dimensions[1] / sq_size, sq_size)
+    print("the winner is: " + winner)
     pygame.quit()
-
-
-def handle_events():
-    for e in pygame.event.get():
-        handle_event(e)
-
-
-def handle_event(e):
-    if e.type == pygame.QUIT:
-        global done
-        done = True
 
 
 start()

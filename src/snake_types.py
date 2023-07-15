@@ -59,13 +59,13 @@ class Vector:
 
     def add_direction(self, direction):
         if direction == Direction.UP:
-            return self + Vector(0,-1)
+            return self + Vector(0, -1)
         elif direction == Direction.DOWN:
-            return self + Vector(0,1)
+            return self + Vector(0, 1)
         elif direction == Direction.LEFT:
-            return self + Vector(-1,0)
+            return self + Vector(-1, 0)
         else:
-            return self + Vector(1,0)
+            return self + Vector(1, 0)
 
     def rotated(self):
         return Vector(-self.y, self.x)
@@ -85,7 +85,7 @@ class Snake:
         self.lengthen = 0
 
     def move(self, width, height):
-        head = Vector(self.positions[0].x,self.positions[0].y).add_direction(self.direction)
+        head = Vector(self.positions[0].x, self.positions[0].y).add_direction(self.direction)
         if head.y < 0:
             head.y = height - 1
         if head.y == height:
@@ -122,30 +122,27 @@ class Bonus:
 
     def __init__(self, world):
         self.position = world.random_free()
-        self.score = 1
 
     def new_position(self, world):
         self.position = world.random_free()
 
-    def collect(self, world):
+    def collect(self, world, tick):
         self.new_position(world)
-        self.score += self.additive
-        self.score *= self.multiplicative
-        return int(self.score), self.effect
+        return int(self.additive + self.multiplicative * tick), self.effect
 
 
 class Apple(Bonus):
-    additive = 4
-    color = [0,255,0]
+    additive = 10
+    color = [0, 255, 0]
 
 
 class Cherry(Bonus):
-    multiplicative = 1.25
+    multiplicative = 1.1
     color = [255, 0, 0]
 
 
 class Banana(Bonus):
-    multiplicative = 1.1
+    multiplicative = 1.05
     color = [255, 255, 0]
     effect = Effect.HALF
 
