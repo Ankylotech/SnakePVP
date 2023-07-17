@@ -25,6 +25,7 @@ class World:
         self.boni.append(Banana(self))
         self.boni.append(Diamond(self))
         for p in players:
+            p.score = 0
             self.position_player(p)
 
     def random_free(self):
