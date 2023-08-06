@@ -18,8 +18,8 @@ class Tournament:
         self.final = final
         if len(players) > group_size:
             self.split = True
-            self.left = Tournament(players[:int(len(players)/2)], group_size, True, False)
-            self.right = Tournament(players[int(len(players)/2):], group_size, True, False)
+            self.left = Tournament(players[:len(players) // 2], group_size, True, False)
+            self.right = Tournament(players[len(players) // 2:], group_size, True, False)
         else:
             self.players = players
             self.split = False
@@ -42,15 +42,15 @@ class Tournament:
             if self.left.play_last(screen, clock, width, height, size) and self.right.play_last(screen, clock, width, height, size):
                 self.left.players.sort(key=lambda p: p.score, reverse=True)
                 self.right.players.sort(key=lambda p: p.score, reverse=True)
-                first_half = copy.deepcopy(self.left.players[:int(self.group_size/2)])
-                second_half = copy.deepcopy(self.right.players[:int(self.group_size/2)])
+                first_half = copy.deepcopy(self.left.players[:self.group_size // 2])
+                second_half = copy.deepcopy(self.right.players[:self.group_size // 2])
                 self.players = first_half + second_half
                 for player in self.players:
                     player.score = 0
                 self.ranked = True
             return False
         else:
-            if len(self.players) > int(self.group_size/2) or self.final:
+            if len(self.players) > self.group_size // 2 or self.final:
                 world = World(self.players, width, height)
                 world.simulate_and_show(screen, clock, size)
             self.ranked = True
@@ -82,7 +82,7 @@ class Tournament:
             pos = Vector(x, y + height / 2 - dy.y * self.group_size / 2)
 
             for i in range(self.group_size):
-                k = i % int(self.group_size / 2)
+                k = i % (self.group_size // 2)
                 text = str(k+1) + ". from "
                 if i > self.group_size/2:
                     text += "lower "
