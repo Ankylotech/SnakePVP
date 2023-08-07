@@ -29,9 +29,9 @@ class World:
             self.position_player(p)
 
     def random_free(self):
-        pos = Vector(int(random.uniform(0, self.width)), int(random.uniform(0, self.height)))
+        pos = Vector(random.randint(0, self.width), random.randint(0, self.height))
         while self.occupied(pos):
-            pos = Vector(int(random.uniform(0, self.width)), int(random.uniform(0, self.height)))
+            pos = Vector(random.randint(0, self.width), random.randint(0, self.height))
         return pos
 
     def generate_obstacles(self):
