@@ -59,7 +59,7 @@ def load_player(filename):
 
 
 def load_ai(filename):
-    def dummy_decide(mySnake, other_snakes, obstacles, boni, world):
+    def dummy_decide(mySnake, other_snakes, obstacles, bonuses, world):
         return Direction.UP
 
     def indent(lines):
@@ -69,7 +69,7 @@ def load_ai(filename):
         if code.startswith("#bot"):
             prelude = []
             lines = code.split("\n")
-            seekerdef = ["from snake_types import *", "def decide(mySnake, other_snakes, obstacles, boni, world):"]
+            seekerdef = ["from snake_types import *", "def decide(mySnake, other_snakes, obstacles, bonuses, world):"]
             seekerret = ["return mySnake.direction"]
             lines = seekerdef + indent(prelude + lines[1:] + seekerret)
             return "\n".join(lines)

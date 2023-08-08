@@ -47,13 +47,13 @@ def init(players, size):
         player_name_images[p.name] = font.render(p.name, True, p.color)
 
 
-def draw(players, obstacles, boni, portals, screen):
+def draw(players, obstacles, bonuses, portals, screen):
     screen.fill(background_color)
     draw_obstacles(obstacles, screen)
     for player in players:
         draw_snake(player, screen)
 
-    draw_boni(boni, screen)
+    draw_bonuses(bonuses, screen)
 
     for portal in portals:
         draw_portal(portal, screen)
@@ -81,9 +81,9 @@ def draw_obstacles(obstacles, screen):
         pygame.draw.rect(screen, color, r)
 
 
-def draw_boni(boni, screen):
+def draw_bonuses(bonuses, screen):
     global sq_size
-    for bonus in boni:
+    for bonus in bonuses:
         pygame.draw.circle(screen, bonus.color,
                            (bonus.position.x * sq_size + sq_size / 2, bonus.position.y * sq_size + sq_size / 2),
                            sq_size / 2)

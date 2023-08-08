@@ -16,13 +16,13 @@ class World:
         self.obstacles = []
         self.portals = []
         self.players = players
-        self.boni = []
+        self.bonuses = []
         self.obstacles = self.generate_obstacles()
         self.portals = self.generate_portals(2)
-        self.boni.append(Apple(self))
-        self.boni.append(Cherry(self))
-        self.boni.append(Banana(self))
-        self.boni.append(Diamond(self))
+        self.bonuses.append(Apple(self))
+        self.bonuses.append(Cherry(self))
+        self.bonuses.append(Banana(self))
+        self.bonuses.append(Diamond(self))
         for p in players:
             p.score = 0
             self.position_player(p)
@@ -90,7 +90,7 @@ class World:
     def occupied(self, pos):
         if self.obstacle(pos) or self.portal(pos):
             return True
-        for bonus in self.boni:
+        for bonus in self.bonuses:
             if bonus is pos:
                 continue
             if bonus.position == pos:
@@ -102,7 +102,7 @@ class World:
             otherSnakes = copy.deepcopy([p.snake for p in self.players if p is not player])
             world = copy.deepcopy(self)
             try:
-                direction = func_timeout(0.1, player.ai, (copy.deepcopy(player.snake), otherSnakes, world.obstacles, world.boni, world))
+                direction = func_timeout(0.1, player.ai, (copy.deepcopy(player.snake), otherSnakes, world.obstacles, world.bonuses, world))
             except FunctionTimedOut:
                 print("The AI of Player "
                       + player.name
@@ -140,7 +140,7 @@ class World:
 
         reverse = 0
         for player in self.players:
-            for bonus in self.boni:
+            for bonus in self.bonuses:
                 if player.snake.positions[0] == bonus.position:
                     value, effect = bonus.collect(self, tick)
                     if effect == Effect.REGULAR:
@@ -158,7 +158,7 @@ class World:
                 player.snake.positions.reverse()
 
     def draw(self, screen):
-        draw.draw(self.players, self.obstacles, self.boni, self.portals, screen)
+        draw.draw(self.players, self.obstacles, self.bonuses, self.portals, screen)
 
     def get_winner(self):
         max = self.players[0].score
