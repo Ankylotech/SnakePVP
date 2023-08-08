@@ -6,8 +6,7 @@ import pygame
 
 import draw
 from snake_types import *
-
-global done
+from func_timeout import func_timeout, FunctionTimedOut
 
 
 class World:
@@ -29,9 +28,9 @@ class World:
             self.position_player(p)
 
     def random_free(self):
-        pos = Vector(random.randint(0, self.width), random.randint(0, self.height))
+        pos = Vector(random.randint(0, self.width-1), random.randint(0, self.height-1))
         while self.occupied(pos):
-            pos = Vector(random.randint(0, self.width), random.randint(0, self.height))
+            pos = Vector(random.randint(0, self.width-1), random.randint(0, self.height-1))
         return pos
 
     def generate_obstacles(self):
@@ -103,7 +102,12 @@ class World:
             otherSnakes = copy.deepcopy([p.snake for p in self.players if p is not player])
             world = copy.deepcopy(self)
             try:
-                direction = player.ai(copy.deepcopy(player.snake), otherSnakes, world.obstacles, world.boni, world)
+                direction = func_timeout(0.1, player.ai, (copy.deepcopy(player.snake), otherSnakes, world.obstacles, world.boni, world))
+            except FunctionTimedOut:
+                print("The AI of Player "
+                      + player.name
+                      + " took to long to complete and was canceled")
+                direction = player.snake.direction
             except Exception as e:
                 print("The AI of Player "
                       + player.name
@@ -176,7 +180,7 @@ class World:
         done = False
         draw.init(self.players, size)
         step = 0
-        while not done and step <= 1000:
+        while step <= 1000:
             handle_events()
             self.update(step)
             self.draw(screen)
@@ -191,5 +195,5 @@ def handle_events():
 
 def handle_event(e):
     if e.type == pygame.QUIT:
-        global done
-        done = True
+        pygame.quit()
+        exit()

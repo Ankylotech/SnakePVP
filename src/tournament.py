@@ -57,16 +57,19 @@ class Tournament:
             return True
 
     def show_bracket(self, screen):
-        for event in pygame.event.get():
-            if event.type == QUIT:
-                return
+        width, height = screen.get_size()
         screen.fill(background_color)
         self.show_scores(screen)
+        font = pygame.font.SysFont("monospace", 40, bold=True)
+        screen.blit(font.render("Press any key to continue", False, pygame.Color(255, 255, 255))
+                    , (width//2 - 300, height - 60))
         pygame.display.flip()
-        pygame.event.clear()
         while True:
             for event in pygame.event.get():
-                if event.type == QUIT or event.type == KEYDOWN:
+                if event.type == QUIT:
+                    pygame.quit()
+                    exit()
+                if event.type == KEYDOWN:
                     return
 
     def show_scores(self, screen, x=0, y=0, width=-1, height=-1):
@@ -79,7 +82,7 @@ class Tournament:
             self.right.show_scores(screen, x + dx.x, y + height / 2, width - dx.x, height / 2)
 
         if len(self.players) == 0:
-            pos = Vector(x, y + height / 2 - dy.y * self.group_size / 2)
+            pos = Vector(x + 10, y + height / 2 - dy.y * self.group_size / 2)
 
             for i in range(self.group_size):
                 k = i % (self.group_size // 2)
