@@ -22,6 +22,14 @@ In the end mySnake.direction must be set to one of the values
 
 The snake will choose to go that direction next turn
 
+## Required packages
+
+This Project builds on the following packages:
+
+    pygame, func_timeout
+
+both can be installed with pip
+
 ## Inspiration
 
 * [Seekers](https://github.com/MatthiasHu/seekers) for functionality and the project overall
