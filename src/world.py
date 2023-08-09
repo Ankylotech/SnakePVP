@@ -1,6 +1,7 @@
 import copy
 import sys
 import traceback
+import math
 
 import pygame
 from func_timeout import func_timeout, FunctionTimedOut
