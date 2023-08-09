@@ -47,7 +47,7 @@ def init(players, size):
         player_name_images[p.name] = font.render(p.name, True, p.color)
 
 
-def draw(players, obstacles, bonuses, portals, screen):
+def draw(players, obstacles, bonuses, portals, screen, remainingSteps):
     screen.fill(background_color)
     draw_obstacles(obstacles, screen)
     for player in players:
@@ -58,7 +58,7 @@ def draw(players, obstacles, bonuses, portals, screen):
     for portal in portals:
         draw_portal(portal, screen)
 
-    draw_information(players, Vector(10, 10), screen)
+    draw_information(players, Vector(10, 10), screen, remainingSteps)
     pygame.display.flip()
 
 
@@ -85,7 +85,7 @@ def draw_obstacles(obstacles, screen):
 def draw_bonuses(bonuses, screen):
     global sq_size
     for bonus in bonuses:
-        center = bonus.position * sq_size + Vector(sq_size/2,sq_size/2)
+        center = bonus.position * sq_size + Vector(sq_size / 2, sq_size / 2)
         pygame.draw.circle(screen, bonus.color,
                            tuple(center),
                            sq_size / 2)
@@ -116,7 +116,7 @@ def draw_text(text, color, pos, screen, center=True):
                 , tuple(adj_pos))
 
 
-def draw_information(players, pos, screen):
+def draw_information(players, pos, screen, remainingSteps):
     global font
 
     dx = Vector(60, 0)
@@ -126,3 +126,5 @@ def draw_information(players, pos, screen):
         draw_text(str(p.score), p.color, pos, screen, center=False)
         screen.blit(player_name_images[p.name], tuple(pos + dx))
         pos += dy
+    width, height = screen.get_size()
+    draw_text(str(remainingSteps // 10), pygame.Color(255, 255, 255), Vector(width - 100, 30), screen, center=False)

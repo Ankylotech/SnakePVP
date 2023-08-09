@@ -1,4 +1,3 @@
-import math
 from enum import Enum
 
 from hash_color import *

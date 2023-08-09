@@ -3,22 +3,22 @@ import sys
 import traceback
 
 import pygame
+from func_timeout import func_timeout, FunctionTimedOut
 
 import draw
 from snake_types import *
-from func_timeout import func_timeout, FunctionTimedOut
 
 
 class World:
     def __init__(self, players, width, height):
         self.width = width
         self.height = height
-        self.obstacleMap = [[False]*width for _ in range(height)]
+        self.obstacleMap = [[False] * width for _ in range(height)]
         self.obstacles = []
         self.portals = []
         self.players = players
         self.bonuses = []
-        self.snakeCounts = [[0]*self.width for _ in range(self.height)]
+        self.snakeCounts = [[0] * self.width for _ in range(self.height)]
         self.generate_obstacles()
         self.portals = self.generate_portals(2)
         self.bonuses.append(Apple(self))
@@ -30,9 +30,9 @@ class World:
             self.position_player(p)
 
     def random_free(self):
-        pos = Vector(random.randint(0, self.width-1), random.randint(0, self.height-1))
+        pos = Vector(random.randint(0, self.width - 1), random.randint(0, self.height - 1))
         while self.occupied(pos):
-            pos = Vector(random.randint(0, self.width-1), random.randint(0, self.height-1))
+            pos = Vector(random.randint(0, self.width - 1), random.randint(0, self.height - 1))
         return pos
 
     def generate_obstacles(self):
@@ -67,7 +67,7 @@ class World:
         self.snakeCounts[pos.x][pos.y] += 1
         for i in range(4):
             player.snake.move(self.width, self.height)
-            self.snakeCounts[self.right(pos,i+1).x][pos.y] += 1
+            self.snakeCounts[self.right(pos, i + 1).x][pos.y] += 1
 
     def obstacle(self, pos, threshold=0):
         return self.obstacleMap[pos.x][pos.y] or self.snakeCounts[pos.x][pos.y] > threshold
@@ -95,7 +95,8 @@ class World:
             otherSnakes = copy.deepcopy([p.snake for p in self.players if p is not player])
             world = copy.deepcopy(self)
             try:
-                direction = func_timeout(0.1, player.ai, (copy.deepcopy(player.snake), otherSnakes, world.obstacles, world.bonuses, world))
+                direction = func_timeout(0.1, player.ai, (
+                copy.deepcopy(player.snake), otherSnakes, world.obstacles, world.bonuses, world))
             except FunctionTimedOut:
                 print("The AI of Player "
                       + player.name
@@ -112,7 +113,7 @@ class World:
     def update(self, tick):
         self.ai_calcs()
 
-        self.snakeCounts = [[0]*self.width for _ in range(self.height)]
+        self.snakeCounts = [[0] * self.width for _ in range(self.height)]
         for player in self.players:
 
             player.snake.move(self.width, self.height)
@@ -143,7 +144,7 @@ class World:
                     value, effect = bonus.collect(self, tick)
                     if effect == Effect.REGULAR:
                         player.score += value
-                        player.snake.lengthen = math.ceil(value / 10)
+                        player.snake.lengthen = value // 10
                     elif effect == Effect.HALF:
                         player.score += value
                         mid = math.ceil((len(player.snake.positions) + player.snake.lengthen) / 2)
@@ -159,8 +160,8 @@ class World:
             for player in self.players:
                 player.snake.positions.reverse()
 
-    def draw(self, screen):
-        draw.draw(self.players, self.obstacles, self.bonuses, self.portals, screen)
+    def draw(self, screen, remainingSteps):
+        draw.draw(self.players, self.obstacles, self.bonuses, self.portals, screen, remainingSteps)
 
     def get_winner(self):
         max = self.players[0].score
@@ -183,7 +184,7 @@ class World:
         while step <= 1000:
             handle_events()
             self.update(step)
-            self.draw(screen)
+            self.draw(screen, 1000 - step)
             clock.tick(10)
             step += 1
 

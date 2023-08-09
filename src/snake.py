@@ -4,12 +4,11 @@ import traceback
 import types
 
 import pygame
-
+from func_timeout import func_timeout, FunctionTimedOut
 
 import utils
 from snake_types import *
 from tournament import Tournament
-from func_timeout import func_timeout, FunctionTimedOut
 
 global screen
 global clock
@@ -27,7 +26,7 @@ def start():
     dimensions = (960, 960)
     screen = pygame.display.set_mode(dimensions)
     clock = pygame.time.Clock()
-    # random.seed(44)
+    # random.seed(42)
 
     players = load_players()
 
@@ -104,7 +103,7 @@ def game_loop(tournament):
     global screen
     global clock
     global dimensions
-    tournament.play_tournament(screen,clock, int(dimensions[0] / sq_size), int(dimensions[1] / sq_size), sq_size)
+    tournament.play_tournament(screen, clock, dimensions[0] // sq_size, dimensions[1] // sq_size, sq_size)
     pygame.quit()
 
 
