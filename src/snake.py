@@ -104,7 +104,7 @@ def game_loop(tournament):
     global screen
     global clock
     global dimensions
-    tournament.play_tournament(screen,clock, dimensions[0] / sq_size, dimensions[1] / sq_size, sq_size)
+    tournament.play_tournament(screen,clock, int(dimensions[0] / sq_size), int(dimensions[1] / sq_size), sq_size)
     pygame.quit()
 
 

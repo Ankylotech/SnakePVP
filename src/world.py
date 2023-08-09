@@ -13,11 +13,12 @@ class World:
     def __init__(self, players, width, height):
         self.width = width
         self.height = height
+        self.obstacleMap = [[False]*width for _ in range(height)]
         self.obstacles = []
         self.portals = []
         self.players = players
         self.bonuses = []
-        self.obstacles = self.generate_obstacles()
+        self.generate_obstacles()
         self.portals = self.generate_portals(2)
         self.bonuses.append(Apple(self))
         self.bonuses.append(Cherry(self))
@@ -34,12 +35,10 @@ class World:
         return pos
 
     def generate_obstacles(self):
-        list = []
-
         while random.uniform(0, 1) < 0.8:
-            list.append(self.random_free())
-
-        return list
+            pos = self.random_free()
+            self.obstacleMap[pos.x][pos.y] = True
+            self.obstacles.append(pos)
 
     def generate_portals(self, num):
         result = []
@@ -51,7 +50,7 @@ class World:
 
     def right(self, pos1, n):
         result = pos1 + Vector(n, 0)
-        result.x %= self.width
+        result.x = result.x % self.width
         return result
 
     def position_player(self, player):
@@ -66,11 +65,8 @@ class World:
             player.snake.move(self.width, self.height)
 
     def obstacle(self, pos):
-        for obstacle in self.obstacles:
-            if obstacle is pos:
-                continue
-            if obstacle == pos:
-                return True
+        if self.obstacleMap[pos.x][pos.y]:
+            return True
         for player in self.players:
             for position in player.snake.positions:
                 if position is pos:
@@ -139,8 +135,11 @@ class World:
             self.position_player(player)
 
         reverse = 0
-        for player in self.players:
-            for bonus in self.bonuses:
+        print("scores:")
+        for bonus in self.bonuses:
+            bonus.update()
+            print(bonus.score)
+            for player in self.players:
                 if player.snake.positions[0] == bonus.position:
                     value, effect = bonus.collect(self, tick)
                     if effect == Effect.REGULAR:
@@ -148,8 +147,12 @@ class World:
                         player.snake.lengthen = math.ceil(value / 10)
                     elif effect == Effect.HALF:
                         player.score += value
-                        mid = math.ceil(len(player.snake.positions) / 2)
-                        player.snake.positions = player.snake.positions[:mid]
+                        mid = math.ceil((len(player.snake.positions) + player.snake.lengthen) / 2)
+                        if player.snake.lengthen < len(player.snake.positions):
+                            player.snake.positions = player.snake.positions[:mid]
+                            player.snake.lengthen = 0
+                        else:
+                            player.snake.lengthen -= mid
                     elif effect == Effect.REVERSE:
                         reverse += 1
 
@@ -176,8 +179,6 @@ class World:
             step += 1
 
     def simulate_and_show(self, screen, clock, size):
-        global done
-        done = False
         draw.init(self.players, size)
         step = 0
         while step <= 1000:

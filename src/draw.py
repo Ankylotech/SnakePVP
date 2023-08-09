@@ -65,7 +65,8 @@ def draw(players, obstacles, bonuses, portals, screen):
 def draw_snake(player, screen):
     global sq_size
     for pos in player.snake.positions:
-        r = pygame.Rect((pos.x * sq_size, pos.y * sq_size)
+        p = tuple(pos * sq_size)
+        r = pygame.Rect(p
                         , (sq_size, sq_size))
         color = player.color
         pygame.draw.rect(screen, color, r)
@@ -74,8 +75,8 @@ def draw_snake(player, screen):
 def draw_obstacles(obstacles, screen):
     global sq_size
     for obstacle in obstacles:
-        x, y = obstacle.x, obstacle.y
-        r = pygame.Rect((x * sq_size, y * sq_size)
+        pos = tuple(obstacle * sq_size)
+        r = pygame.Rect(pos
                         , (sq_size, sq_size))
         color = [255, 0, 0]
         pygame.draw.rect(screen, color, r)
@@ -84,8 +85,9 @@ def draw_obstacles(obstacles, screen):
 def draw_bonuses(bonuses, screen):
     global sq_size
     for bonus in bonuses:
+        center = bonus.position * sq_size + Vector(sq_size/2,sq_size/2)
         pygame.draw.circle(screen, bonus.color,
-                           (bonus.position.x * sq_size + sq_size / 2, bonus.position.y * sq_size + sq_size / 2),
+                           tuple(center),
                            sq_size / 2)
 
 
@@ -94,13 +96,15 @@ def draw_portal(portal, screen):
     global blue_portal
     global sq_size
     global portal_num
+    pos1 = portal.position1 * sq_size
+    pos2 = portal.position2 * sq_size
     if portal_num == 0:
-        screen.blit(orange_portal, (portal.position1.x * sq_size, portal.position1.y * sq_size))
-        screen.blit(orange_portal, (portal.position2.x * sq_size, portal.position2.y * sq_size))
+        screen.blit(orange_portal, tuple(pos1))
+        screen.blit(orange_portal, tuple(pos2))
         portal_num += 1
     else:
-        screen.blit(blue_portal, (portal.position1.x * sq_size, portal.position1.y * sq_size))
-        screen.blit(blue_portal, (portal.position2.x * sq_size, portal.position2.y * sq_size))
+        screen.blit(blue_portal, tuple(pos1))
+        screen.blit(blue_portal, tuple(pos2))
         portal_num = 0
 
 

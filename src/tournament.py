@@ -2,8 +2,6 @@ import copy
 import pygame
 from pygame.locals import *
 from snake_types import Vector
-from draw import draw_text,init
-import sys
 
 from world import World
 background_color = [0, 0, 30]
@@ -87,7 +85,7 @@ class Tournament:
             for i in range(self.group_size):
                 k = i % (self.group_size // 2)
                 text = str(k+1) + ". from "
-                if i > self.group_size/2:
+                if k != i:
                     text += "lower "
                 else:
                     text += "upper "

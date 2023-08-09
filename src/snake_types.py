@@ -44,18 +44,8 @@ class Vector:
     def __eq__(self, other):
         return self.x == other.x and self.y == other.y
 
-    def dot(self, other):
-        return (self.x * other.x + self.y * other.y)
-
-    def norm(self):
-        return math.sqrt(self.x * self.x + self.y * self.y)
-
-    def normalized(self):
-        norm = self.norm()
-        if (norm == 0):
-            return Vector(0, 0)
-        else:
-            return Vector(self.x / norm, self.y / norm)
+    def __str__(self):
+        return "Vector(" + str(self.x) + ", " + str(self.y) + ")"
 
     def add_direction(self, direction):
         if direction == Direction.UP:
@@ -85,7 +75,7 @@ class Snake:
         self.lengthen = 0
 
     def move(self, width, height):
-        head = Vector(self.positions[0].x, self.positions[0].y).add_direction(self.direction)
+        head = self.positions[0].add_direction(self.direction)
         if head.y < 0:
             head.y = height - 1
         if head.y == height:
@@ -119,6 +109,7 @@ class Bonus:
     multiplicative = 1
     color = [0, 0, 0]
     effect = Effect.REGULAR
+    score = 10
 
     def __init__(self, world):
         self.position = world.random_free()
@@ -128,21 +119,25 @@ class Bonus:
 
     def collect(self, world, tick):
         self.new_position(world)
-        return int(self.additive + self.multiplicative * tick), self.effect
+        return int(self.score), self.effect
+
+    def update(self):
+        self.score += self.additive
+        self.score *= self.multiplicative
 
 
 class Apple(Bonus):
-    additive = 10
+    additive = 0.6
     color = [0, 255, 0]
 
 
 class Cherry(Bonus):
-    multiplicative = 1.1
+    multiplicative = 1.005
     color = [255, 0, 0]
 
 
 class Banana(Bonus):
-    multiplicative = 1.05
+    additive = 0.3
     color = [255, 255, 0]
     effect = Effect.HALF
 
