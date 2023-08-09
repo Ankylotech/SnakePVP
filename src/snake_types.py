@@ -75,7 +75,7 @@ class Snake:
         self.lengthen = 0
 
     def move(self, width, height):
-        head = self.positions[0].add_direction(self.direction)
+        head = self.head().add_direction(self.direction)
         if head.y < 0:
             head.y = height - 1
         if head.y == height:
@@ -90,6 +90,9 @@ class Snake:
             self.positions.pop()
         else:
             self.lengthen -= 1
+
+    def head(self):
+        return self.positions[0]
 
 
 class Player:

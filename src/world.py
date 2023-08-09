@@ -18,6 +18,7 @@ class World:
         self.portals = []
         self.players = players
         self.bonuses = []
+        self.snakeCounts = [[0]*self.width for _ in range(self.height)]
         self.generate_obstacles()
         self.portals = self.generate_portals(2)
         self.bonuses.append(Apple(self))
@@ -54,6 +55,8 @@ class World:
         return result
 
     def position_player(self, player):
+        for p in player.snake.positions:
+            self.snakeCounts[p.x][p.y] -= 1
         pos = self.random_free()
         while self.occupied(self.right(pos, 1)) or self.occupied(self.right(pos, 2)) or self.occupied(
                 self.right(pos, 3)) or self.occupied(self.right(pos, 4)):
@@ -61,19 +64,13 @@ class World:
         player.snake.positions = [pos]
         player.snake.direction = Direction.RIGHT
         player.snake.lengthen = 4
-        for _ in range(4):
+        self.snakeCounts[pos.x][pos.y] += 1
+        for i in range(4):
             player.snake.move(self.width, self.height)
+            self.snakeCounts[self.right(pos,i+1).x][pos.y] += 1
 
-    def obstacle(self, pos):
-        if self.obstacleMap[pos.x][pos.y]:
-            return True
-        for player in self.players:
-            for position in player.snake.positions:
-                if position is pos:
-                    continue
-                if pos == position:
-                    return True
-        return False
+    def obstacle(self, pos, threshold=0):
+        return self.obstacleMap[pos.x][pos.y] or self.snakeCounts[pos.x][pos.y] > threshold
 
     def portal(self, pos):
         for portal in self.portals:
@@ -114,20 +111,24 @@ class World:
 
     def update(self, tick):
         self.ai_calcs()
+
+        self.snakeCounts = [[0]*self.width for _ in range(self.height)]
         for player in self.players:
+
             player.snake.move(self.width, self.height)
 
-        for player in self.players:
-            position = player.snake.positions[0]
+            position = player.snake.head()
             for portal in self.portals:
                 if position == portal.position1:
                     player.snake.positions[0] = copy.copy(portal.position2)
                 if position == portal.position2:
                     player.snake.positions[0] = copy.copy(portal.position1)
+            for pos in player.snake.positions:
+                self.snakeCounts[pos.x][pos.y] += 1
 
         reset = []
         for player in self.players:
-            if self.obstacle(player.snake.positions[0]):
+            if self.obstacle(player.snake.head(), 1):
                 reset.append(player)
 
         for player in reset:
@@ -135,12 +136,10 @@ class World:
             self.position_player(player)
 
         reverse = 0
-        print("scores:")
         for bonus in self.bonuses:
             bonus.update()
-            print(bonus.score)
             for player in self.players:
-                if player.snake.positions[0] == bonus.position:
+                if player.snake.head() == bonus.position:
                     value, effect = bonus.collect(self, tick)
                     if effect == Effect.REGULAR:
                         player.score += value
