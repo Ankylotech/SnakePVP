@@ -29,6 +29,8 @@ The snake will choose to go that direction next turn
 
 The Objective of the game is to collect as many points as possible. 
 This can be achieved by collecting "apples", "cherrys" or "bananas". These give more points, the longer the game goes.
+Also when collected the snake grows by a tenth of the amount of points they give. 
+(e.g. if the collectable gives 44 points, the snake grows by 4 tiles)
 Bananas have the additional effect of halving the players points. An additional collectable is the "diamond". This turns
 all snakes around.
 
@@ -43,7 +45,7 @@ These values are such that apples give the most points for about 3/4 of the game
 catch up later in the game
 
 Snakes have to avoid hitting obstacles. These can be either red blocks that are placed initially and dont move, or the tiles 
-of other snakes.
+of other snakes. If a snake hits an obstacle, the points are divided by 3 and the snake is placed in a new position
 
 To help with movement there are also portals that can teleport snakes.
 
@@ -123,10 +125,9 @@ Manages everything in a game
 ###### Functions
 
 * obstacle(position, threshold = 0): Returns whether there is an obstacle or more than the threshold snakes at the given position
-
 * portal(position): Returns whether there is an obstacle at the given location
-
 * occupied(position): Returns whether there is anything at the given location (obstacle, snake, portal or collectable)
+* move_and_teleport(position, direction): Returns a new position after going through portals and wrapping around edges
 
 ##### Direction
 

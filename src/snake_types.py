@@ -62,6 +62,9 @@ class Vector:
     def fmap(self, f):
         return Vector(f(self.x), f(self.y))
 
+    def dist(self, other):
+        return abs(self.x - other.x) + abs(self.y - other.y)
+
 
 class Direction(Enum):
     UP, DOWN, LEFT, RIGHT = range(4)
