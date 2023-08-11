@@ -119,9 +119,12 @@ class Bonus:
     def new_position(self, world):
         self.position = world.random_free()
 
-    def collect(self, world, tick):
+    def collect(self, world):
         self.new_position(world)
-        return int(self.score), self.effect
+        return self.get_current_score(), self.effect
+
+    def get_current_score(self):
+        return int(self.score)
 
     def update(self):
         self.score += self.additive
