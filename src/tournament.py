@@ -1,6 +1,5 @@
 import copy
 import random
-
 import pygame
 from pygame.locals import *
 
@@ -10,22 +9,23 @@ from world import World
 background_color = [0, 0, 30]
 
 
+# Class for managing a snake game tournament
 class Tournament:
-    def __init__(self, players, group_size=4, sub=False, final=True):
+    # Initialize tournament and split if necessary
+    def __init__(self, players, group_size=4, final=True):
         self.players = []
         self.group_size = group_size
-        self.sub = sub
-        self.ranked = False
         self.final = final
-        random.shuffle(players)
+        self.ranked = len(players) == group_size / 2
         if len(players) > group_size:
             self.split = True
-            self.left = Tournament(players[:len(players) // 2], group_size, True, False)
-            self.right = Tournament(players[len(players) // 2:], group_size, True, False)
+            self.left = Tournament(players[:len(players) // 2], group_size, False)
+            self.right = Tournament(players[len(players) // 2:], group_size, False)
         else:
             self.players = players
             self.split = False
 
+    # Play the full tournament
     def play_tournament(self, screen, clock, width, height, size):
         if self.split:
             self.show_bracket(screen)
@@ -39,26 +39,29 @@ class Tournament:
         if self.split:
             self.show_bracket(screen)
 
+    # Play the last layer of tournament games that have not been played yet
     def play_last(self, screen, clock, width, height, size):
-        if self.split and not self.left.ranked:
+        if self.split and len(self.players) == 0 and not self.ranked:
             if self.left.play_last(screen, clock, width, height, size) and self.right.play_last(screen, clock, width,
                                                                                                 height, size):
-                self.left.players.sort(key=lambda p: p.score, reverse=True)
-                self.right.players.sort(key=lambda p: p.score, reverse=True)
                 first_half = copy.deepcopy(self.left.players[:self.group_size // 2])
                 second_half = copy.deepcopy(self.right.players[:self.group_size // 2])
                 self.players = first_half + second_half
                 for player in self.players:
                     player.score = 0
-                self.ranked = True
             return False
         else:
-            if len(self.players) > self.group_size // 2 or self.final:
+            if (len(self.players) > self.group_size // 2 or self.final) and not self.ranked:
                 world = World(self.players, width, height)
                 world.simulate_and_show(screen, clock, size)
+                self.players.sort(key=lambda p: p.score, reverse=True)
+                print("Scores:")
+                for p in self.players:
+                    print(p.name + ":" + str(p.score))
             self.ranked = True
             return True
 
+    # Show the current bracket of games played and to be played
     def show_bracket(self, screen):
         width, height = screen.get_size()
         screen.fill(background_color)
@@ -76,6 +79,7 @@ class Tournament:
                 if event.type == KEYDOWN:
                     return
 
+    # total length of texts in the tournament bracket
     def total_max_text(self):
         total = 0
         if self.split:
@@ -92,12 +96,14 @@ class Tournament:
             total += font.size(maxName + ": ")[0]
         return total
 
+    # Total depth of games to be played
     def total_depth(self):
         if self.split:
-            return self.left.total_depth() + 1
+            return max(self.left.total_depth(), self.right.total_depth()) + 1
         else:
             return 1
 
+    # Show the Bracket scores
     def show_scores(self, screen, space, x, y, width, height):
         if width == -1:
             width, height = screen.get_size()
