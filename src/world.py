@@ -21,7 +21,7 @@ class World:
         self.bonuses = []
         self.snakeCounts = [[0] * self.width for _ in range(self.height)]
         self.generate_obstacles()
-        self.portals = self.generate_portals(2)
+        self.generate_portals(2)
         self.bonuses.append(Apple(self))
         self.bonuses.append(Cherry(self))
         self.bonuses.append(Banana(self))
@@ -43,11 +43,30 @@ class World:
             self.obstacles.append(pos)
 
     def generate_portals(self, num):
-        result = []
         for _ in range(num):
             pos1 = self.random_free()
             pos2 = self.random_free()
-            result.append(Portal(pos1, pos2))
+            self.portals.append(Portal(pos1, pos2))
+
+    def add_direction(self, pos, direction):
+        result = pos.add_direction(direction)
+        if result.x < 0:
+            result.x += self.width
+        if result.x >= self.width:
+            result.x -= self.width
+        if result.y < 0:
+            result.y += self.height
+        if result.y >= self.height:
+            result.y -= self.height
+        return result
+
+    def move_and_teleport(self, pos, direction):
+        result = self.add_direction(pos,direction)
+        for portal in self.portals:
+            if portal.position1 == result:
+                return copy.copy(portal.position2)
+            if portal.position2 == result:
+                return copy.copy(portal.position1)
         return result
 
     def right(self, pos1, n):
@@ -111,7 +130,7 @@ class World:
                 direction = player.snake.direction
             player.snake.direction = Direction(direction)
 
-    def update(self, tick):
+    def update(self):
         self.ai_calcs()
 
         self.snakeCounts = [[0] * self.width for _ in range(self.height)]
@@ -142,7 +161,7 @@ class World:
             bonus.update()
             for player in self.players:
                 if player.snake.head() == bonus.position:
-                    value, effect = bonus.collect(self, tick)
+                    value, effect = bonus.collect(self)
                     if effect == Effect.REGULAR:
                         player.score += value
                         player.snake.lengthen = value // 10
@@ -176,7 +195,7 @@ class World:
     def simulate(self):
         step = 0
         while step < 1000:
-            self.update(step)
+            self.update()
             step += 1
 
     def simulate_and_show(self, screen, clock, size):
@@ -184,7 +203,7 @@ class World:
         step = 0
         while step <= 1000:
             handle_events()
-            self.update(step)
+            self.update()
             self.draw(screen, 1000 - step)
             clock.tick(10)
             step += 1

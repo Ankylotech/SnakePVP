@@ -3,6 +3,7 @@ from enum import Enum
 from hash_color import *
 
 
+# Vector class for storing positions
 class Vector:
     def __init__(self, x=0, y=0):
         self.x = x
@@ -62,11 +63,16 @@ class Vector:
     def fmap(self, f):
         return Vector(f(self.x), f(self.y))
 
+    def dist(self, other):
+        return abs(self.x - other.x) + abs(self.y - other.y)
 
+
+# The 4 directions a snake can move
 class Direction(Enum):
     UP, DOWN, LEFT, RIGHT = range(4)
 
 
+# Snake class for managing movement and position if a snake
 class Snake:
     def __init__(self, positions, direction):
         self.positions = positions
@@ -94,6 +100,7 @@ class Snake:
         return self.positions[0]
 
 
+# Player class for managing player ais and snakes
 class Player:
     def __init__(self, name):
         self.name = name
@@ -102,11 +109,13 @@ class Player:
         self.snake = Snake([], Direction.UP)
 
 
+# Enum for managing the different effect a Bonus can have
 class Effect(Enum):
     REGULAR, HALF, REVERSE = range(3)
 
 
-class Bonus:
+# Class for managing collectables in the game
+class Collectable:
     additive = 0
     multiplicative = 1
     color = [0, 0, 0]
@@ -119,32 +128,35 @@ class Bonus:
     def new_position(self, world):
         self.position = world.random_free()
 
-    def collect(self, world, tick):
+    def collect(self, world):
         self.new_position(world)
-        return int(self.score), self.effect
+        return self.get_current_score(), self.effect
+
+    def get_current_score(self):
+        return int(self.score)
 
     def update(self):
         self.score += self.additive
         self.score *= self.multiplicative
 
 
-class Apple(Bonus):
+class Apple(Collectable):
     additive = 0.6
     color = [0, 255, 0]
 
 
-class Cherry(Bonus):
+class Cherry(Collectable):
     multiplicative = 1.005
     color = [255, 0, 0]
 
 
-class Banana(Bonus):
+class Banana(Collectable):
     additive = 0.3
     color = [255, 255, 0]
     effect = Effect.HALF
 
 
-class Diamond(Bonus):
+class Diamond(Collectable):
     multiplicative = 0
     color = [200, 200, 255]
     effect = Effect.REVERSE

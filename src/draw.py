@@ -1,5 +1,5 @@
+# This file deals with drawing different things during a game
 import copy
-
 import pygame
 
 from snake_types import Vector
@@ -8,12 +8,15 @@ global sq_size
 global orange_portal
 global blue_portal
 global portal_num
+global font
 player_name_images = {}
 font = None
 background_color = [0, 0, 30]
 green = pygame.Color(0, 255, 0)
 
 
+# A function that takes an image and replaces all occurrences of the first color with the second.
+# Everything that is not the first color will be made invisible.
 def replace(image, color1, color2):
     w, h = image.get_size()
     result = copy.copy(image)
@@ -27,12 +30,13 @@ def replace(image, color1, color2):
     return result
 
 
+# Inititalize variables for drawing
 def init(players, size):
-    global font
     global sq_size
     global orange_portal
     global blue_portal
     global portal_num
+    global font
 
     portal_num = 0
     sq_size = size
@@ -47,6 +51,7 @@ def init(players, size):
         player_name_images[p.name] = font.render(p.name, True, p.color)
 
 
+# Draw players, obstacles, bonuses and portals on the screen, along with the time remaining
 def draw(players, obstacles, bonuses, portals, screen, remainingSteps):
     screen.fill(background_color)
     draw_obstacles(obstacles, screen)
@@ -62,6 +67,7 @@ def draw(players, obstacles, bonuses, portals, screen, remainingSteps):
     pygame.display.flip()
 
 
+# Draw a snake on the screen
 def draw_snake(player, screen):
     global sq_size
     for pos in player.snake.positions:
@@ -72,6 +78,7 @@ def draw_snake(player, screen):
         pygame.draw.rect(screen, color, r)
 
 
+# Draw an obstacle on the screen
 def draw_obstacles(obstacles, screen):
     global sq_size
     for obstacle in obstacles:
@@ -82,6 +89,7 @@ def draw_obstacles(obstacles, screen):
         pygame.draw.rect(screen, color, r)
 
 
+# Draw a collectable on the screen
 def draw_bonuses(bonuses, screen):
     global sq_size
     for bonus in bonuses:
@@ -91,6 +99,7 @@ def draw_bonuses(bonuses, screen):
                            sq_size / 2)
 
 
+# Draw a blue or orange portal on the screen
 def draw_portal(portal, screen):
     global orange_portal
     global blue_portal
@@ -108,6 +117,7 @@ def draw_portal(portal, screen):
         portal_num = 0
 
 
+# Draw some text on the screen
 def draw_text(text, color, pos, screen, center=True):
     global font
     (dx, dy) = font.size(text)
@@ -116,9 +126,8 @@ def draw_text(text, color, pos, screen, center=True):
                 , tuple(adj_pos))
 
 
+# Draw player stats and time remaining on the screen
 def draw_information(players, pos, screen, remainingSteps):
-    global font
-
     dx = Vector(60, 0)
     dy = Vector(0, 30)
     pos += dy
