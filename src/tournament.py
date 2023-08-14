@@ -29,7 +29,8 @@ class Tournament:
     def play_tournament(self, screen, clock, width, height, size):
         if self.split:
             self.show_bracket(screen)
-        while not self.play_last(screen, clock, width, height, size):
+        while not self.ranked:
+            self.play_last(screen, clock, width, height, size)
             if self.split:
                 self.show_bracket(screen)
         self.players.sort(key=lambda p: p.score, reverse=True)
@@ -39,17 +40,26 @@ class Tournament:
         if self.split:
             self.show_bracket(screen)
 
+    def non_ranked_depth(self):
+        if self.ranked:
+            return 0
+        if not self.split:
+            return 1
+        return max(self.left.non_ranked_depth(), self.right.non_ranked_depth()) + 1
+
     # Play the last layer of tournament games that have not been played yet
     def play_last(self, screen, clock, width, height, size):
-        if self.split and len(self.players) == 0 and not self.ranked:
-            if self.left.play_last(screen, clock, width, height, size) and self.right.play_last(screen, clock, width,
-                                                                                                height, size):
+        if self.split and not (self.left.ranked and self.right.ranked) and not self.ranked:
+            if self.left.non_ranked_depth() < self.right.non_ranked_depth():
+                self.right.play_last(screen, clock, width, height, size)
+            else:
+                self.left.play_last(screen, clock, width, height, size)
+            if self.left.ranked and self.right.ranked:
                 first_half = copy.deepcopy(self.left.players[:self.group_size // 2])
                 second_half = copy.deepcopy(self.right.players[:self.group_size // 2])
                 self.players = first_half + second_half
                 for player in self.players:
                     player.score = 0
-            return False
         else:
             if (len(self.players) > self.group_size // 2 or self.final) and not self.ranked:
                 world = World(self.players, width, height)
@@ -59,7 +69,6 @@ class Tournament:
                 for p in self.players:
                     print(p.name + ":" + str(p.score))
             self.ranked = True
-            return True
 
     # Show the current bracket of games played and to be played
     def show_bracket(self, screen):
@@ -104,7 +113,7 @@ class Tournament:
             return 1
 
     # Show the Bracket scores
-    def show_scores(self, screen, space, x, y, width, height):
+    def show_scores(self, screen, space, x, y, width, height, active=True):
         if width == -1:
             width, height = screen.get_size()
         font = pygame.font.SysFont("monospace", 20, bold=True)
@@ -143,5 +152,13 @@ class Tournament:
                 pos += dy
         dx.x += space
         if self.split:
-            self.left.show_scores(screen, space, x + dx.x, y, width - dx.x, height / 2)
-            self.right.show_scores(screen, space, x + dx.x, y + height / 2, width - dx.x, height / 2)
+            if self.ranked:
+                active = False
+            right_active = self.left.non_ranked_depth() < self.right.non_ranked_depth()
+            self.left.show_scores(screen, space, x + dx.x, y, width - dx.x, height / 2, active and not right_active)
+            self.right.show_scores(screen, space, x + dx.x, y + height / 2, width - dx.x, height / 2, active and right_active)
+
+        if active and not self.ranked and (not self.split or (self.split and self.left.ranked and self.right.ranked)):
+            start = (x, y + height / 2 + dy.y * len(self.players) / 2)
+            end = (x + dx.x - space, y + height / 2 + dy.y * len(self.players) / 2)
+            pygame.draw.line(screen, (255, 0, 0), start, end, 2)
