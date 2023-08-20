@@ -1,7 +1,6 @@
 # This file deals with drawing different things during a game
 import copy
 import pygame
-
 from snake_types import Vector
 
 global sq_size
@@ -125,7 +124,6 @@ def draw_text(text, color, pos, screen, center=True):
     screen.blit(font.render(text, False, color)
                 , tuple(adj_pos))
 
-
 # Draw player stats and time remaining on the screen
 def draw_information(players, pos, screen, remainingSteps):
     dx = Vector(60, 0)
@@ -136,4 +134,4 @@ def draw_information(players, pos, screen, remainingSteps):
         screen.blit(player_name_images[p.name], tuple(pos + dx))
         pos += dy
     width, height = screen.get_size()
-    draw_text(str(remainingSteps // 10), pygame.Color(255, 255, 255), Vector(width - 100, 30), screen, center=False)
+    draw_text(str(remainingSteps // 20), pygame.Color(255, 255, 255), Vector(width - 100, 30), screen, center=False)

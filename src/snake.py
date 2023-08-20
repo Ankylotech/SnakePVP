@@ -86,7 +86,8 @@ def load_ai(filename):
             code = mogrify(f.read())
             mod = types.ModuleType(filename[:-3])
             mod_dict = mod.__dict__
-            func_timeout(1, exec, (code, mod_dict))
+            func_timeout(1
+                         , exec, (code, mod_dict))
             ai = mod.decide
     except FunctionTimedOut:
         print(filename)

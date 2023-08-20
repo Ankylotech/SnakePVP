@@ -205,7 +205,7 @@ class World:
             handle_events()
             self.update()
             self.draw(screen, 1000 - step)
-            clock.tick(10)
+            clock.tick(20)
             step += 1
 
 
