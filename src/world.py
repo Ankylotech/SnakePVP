@@ -12,6 +12,7 @@ from snake_types import *
 
 class World:
     def __init__(self, players, width, height):
+        self.timer = 0
         self.width = width
         self.height = height
         self.obstacleMap = [[False] * width for _ in range(height)]
@@ -115,20 +116,23 @@ class World:
             otherSnakes = copy.deepcopy([p.snake for p in self.players if p is not player])
             world = copy.deepcopy(self)
             try:
-                direction = func_timeout(0.1, player.ai, (
+                direction, memory = func_timeout(0.1, player.ai, (
                 copy.deepcopy(player.snake), otherSnakes, world.obstacles, world.bonuses, world))
             except FunctionTimedOut:
                 print("The AI of Player "
                       + player.name
                       + " took to long to complete and was canceled")
                 direction = player.snake.direction
+                memory = player.snake.memory
             except Exception as e:
                 print("The AI of Player "
                       + player.name
                       + " raised an exception:")
                 traceback.print_exc(file=sys.stderr)
                 direction = player.snake.direction
+                memory = player.snake.memory
             player.snake.direction = Direction(direction)
+            player.snake.memory = memory
 
     def update(self):
         self.ai_calcs()
@@ -175,6 +179,8 @@ class World:
                             player.snake.lengthen -= mid
                     elif effect == Effect.REVERSE:
                         reverse += 1
+        for player in self.players:
+            player.snake.score = player.score
 
         if reverse % 2 == 1:
             for player in self.players:
@@ -193,20 +199,20 @@ class World:
         return win
 
     def simulate(self):
-        step = 0
-        while step < 1000:
+        self.timer = 1000
+        while self.timer > 0:
             self.update()
-            step += 1
+            self.timer -= 1
 
     def simulate_and_show(self, screen, clock, size):
         draw.init(self.players, size)
-        step = 0
-        while step <= 1000:
+        self.timer = 1000
+        while self.timer > 0:
             handle_events()
             self.update()
-            self.draw(screen, 1000 - step)
+            self.draw(screen, self.timer)
             clock.tick(20)
-            step += 1
+            self.timer -= 1
 
 
 def handle_events():

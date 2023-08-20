@@ -77,7 +77,9 @@ class Snake:
     def __init__(self, positions, direction):
         self.positions = positions
         self.direction = direction
+        self.memory = {}
         self.lengthen = 0
+        self.score = 0
 
     def move(self, width, height):
         head = self.head().add_direction(self.direction)

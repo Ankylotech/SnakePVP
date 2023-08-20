@@ -14,12 +14,14 @@ background_color = [0, 0, 30]
 class Tournament:
     # Initialize tournament and split if necessary
     def __init__(self, players, final=True):
-        self.players = [[x, 0.0, 0] for x in players]
+        self.players = [[x, 0, 0] for x in players]
         shuffle(self.players)
         self.final = final
         self.ranked = False
-        self.games = list(combinations(range(len(self.players)), 2))
-        self.games.sort(key = lambda game: game[0] - game[1])
+        games = list(combinations(range(len(self.players)), 2))
+
+        games.sort(key = lambda game: game[0] - game[1])
+        self.games = [(self.players[x[0]], self.players[x[1]]) for x in games]
 
     # Play the full tournament
     def play_tournament(self, screen, clock, width, height, size):
@@ -38,19 +40,19 @@ class Tournament:
     # Play the last layer of tournament games that have not been played yet
     def play_next(self, screen, clock, width, height, size):
         game = self.games.pop()
-        p1 = self.players[game[0]][0]
-        p2 = self.players[game[1]][0]
+        p1 = game[0][0]
+        p2 = game[1][0]
         world = World([p1, p2], width, height)
         world.simulate_and_show(screen, clock, size)
-        self.players[game[0]][2] += 1
-        self.players[game[1]][2] += 1
+        game[0][2] += 1
+        game[1][2] += 1
         if p1.score > p2.score:
-            self.players[game[0]][1] += 1
+            game[0][1] += 3
         elif p2.score > p1.score:
-            self.players[game[1]][1] += 1
+            game[1][1] += 3
         else:
-            self.players[game[0]][1] += 0.5
-            self.players[game[1]][1] += 0.5
+            game[0][1] += 1
+            game[1][1] += 1
 
     # Show the current bracket of games played and to be played
     def show_bracket(self, screen, width, height):
@@ -73,6 +75,12 @@ class Tournament:
         font = pygame.font.SysFont("monospace", 40, bold=True)
         screen.blit(font.render("Press any key to continue", False, pygame.Color(255, 255, 255))
                     , (width // 2 - 300, height - 60))
+        font = pygame.font.SysFont("monospace", 20, bold=True)
+        game = self.games[-1]
+        text = "Next game: " + str(game[0][0].name) + " vs " + str(game[1][0].name)
+        (dx, dy) = font.size(text)
+        screen.blit(font.render(text, False, pygame.Color(255, 255, 255))
+                    , (width // 2 - dx/2, height - 100))
         pygame.display.flip()
         while True:
             for event in pygame.event.get():

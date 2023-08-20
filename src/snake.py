@@ -64,7 +64,7 @@ def load_player(filename):
 def load_ai(filename):
     # If an AI could not be loaded, it is replaced with a dummy that only moves up
     def dummy_decide(mySnake, other_snakes, obstacles, bonuses, world):
-        return Direction.UP
+        return Direction.UP, mySnake.memory
 
     def indent(lines):
         return utils.fmap(lambda l: " " + l, lines)
@@ -75,7 +75,7 @@ def load_ai(filename):
             prelude = []
             lines = code.split("\n")
             seekerdef = ["from snake_types import *", "def decide(mySnake, other_snakes, obstacles, bonuses, world):"]
-            seekerret = ["return mySnake.direction"]
+            seekerret = ["return mySnake.direction, mySnake.memory"]
             lines = seekerdef + indent(prelude + lines[1:] + seekerret)
             return "\n".join(lines)
         else:
