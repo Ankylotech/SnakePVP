@@ -9,6 +9,8 @@ from func_timeout import func_timeout, FunctionTimedOut
 import draw
 from snake_types import *
 
+max_speed = True
+
 
 class World:
     def __init__(self, players, width, height):
@@ -211,7 +213,8 @@ class World:
             handle_events()
             self.update()
             self.draw(screen, self.timer)
-            clock.tick(20)
+            if not max_speed:
+                clock.tick(20)
             self.timer -= 1
 
 

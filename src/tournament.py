@@ -47,12 +47,12 @@ class Tournament:
         game[0][2] += 1
         game[1][2] += 1
         if p1.score > p2.score:
-            game[0][1] += 3
+            game[0][1] += p1.score
         elif p2.score > p1.score:
-            game[1][1] += 3
+            game[1][1] += p2.score
         else:
-            game[0][1] += 1
-            game[1][1] += 1
+            game[0][1] += p1.score // 2
+            game[1][1] += p2.score // 2
 
     # Show the current bracket of games played and to be played
     def show_bracket(self, screen, width, height):
@@ -75,12 +75,13 @@ class Tournament:
         font = pygame.font.SysFont("monospace", 40, bold=True)
         screen.blit(font.render("Press any key to continue", False, pygame.Color(255, 255, 255))
                     , (width // 2 - 300, height - 60))
-        font = pygame.font.SysFont("monospace", 20, bold=True)
-        game = self.games[-1]
-        text = "Next game: " + str(game[0][0].name) + " vs " + str(game[1][0].name)
-        (dx, dy) = font.size(text)
-        screen.blit(font.render(text, False, pygame.Color(255, 255, 255))
-                    , (width // 2 - dx/2, height - 100))
+        if len(self.games) > 0:
+            font = pygame.font.SysFont("monospace", 20, bold=True)
+            game = self.games[-1]
+            text = "Next game: " + str(game[0][0].name) + " vs " + str(game[1][0].name)
+            (dx, dy) = font.size(text)
+            screen.blit(font.render(text, False, pygame.Color(255, 255, 255))
+                        , (width // 2 - dx/2, height - 100))
         pygame.display.flip()
         while True:
             for event in pygame.event.get():
