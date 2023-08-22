@@ -12,19 +12,17 @@ from tournament import Tournament
 
 global screen
 global clock
-global dimensions
-sq_size = 32
+square = 30
+dimensions = (900, 900)
 
 
 # Function that starts the game by loading all players and playing a tournament
 def start():
     global screen
     global clock
-    global dimensions
 
     pygame.init()
     pygame.event.set_allowed([pygame.QUIT])
-    dimensions = (960, 960)
     screen = pygame.display.set_mode(dimensions)
     clock = pygame.time.Clock()
     # random.seed(42)
@@ -110,8 +108,7 @@ def load_ai(filename):
 def game_loop(tournament):
     global screen
     global clock
-    global dimensions
-    tournament.play_tournament(screen, clock, dimensions[0] // sq_size, dimensions[1] // sq_size, sq_size)
+    tournament.play_tournament(screen, clock, square, square, dimensions[0] // square)
     pygame.quit()
 
 
