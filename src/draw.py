@@ -44,7 +44,7 @@ def init(players, size):
     blue = pygame.Color(0, 20, 255)
     orange_portal = replace(portal, green, orange)
     blue_portal = replace(portal, green, blue)
-    font = pygame.font.SysFont("monospace", 20, bold=True)
+    font = pygame.font.SysFont("monospace", (sq_size * 20)//32, bold=True)
 
     for p in players:
         player_name_images[p.name] = font.render(p.name, True, p.color)
@@ -126,8 +126,10 @@ def draw_text(text, color, pos, screen, center=True):
 
 # Draw player stats and time remaining on the screen
 def draw_information(players, pos, screen, remainingSteps):
-    dx = Vector(60, 0)
-    dy = Vector(0, 30)
+    global font
+    dx0,dy0 = font.size("12345")
+    dx = Vector(dx0,0)
+    dy = Vector(0,dy0)
     pos += dy
     for p in players:
         draw_text(str(p.score), p.color, pos, screen, center=False)

@@ -27,15 +27,15 @@ class Tournament:
 
     # Play the full tournament
     def play_tournament(self, screen, clock, width, height, size):
-        self.show_bracket(screen, width * size, height * size)
+        self.show_bracket(screen, width * size, height * size, size)
         while len(self.games) > 0:
             self.play_next(screen, clock, width, height, size)
             k = len(self.players) * 2
             self.players.sort(key=lambda p: (p[1]+1) * k - p[2], reverse=True)
             if not simulate:
-                self.show_bracket(screen, width * size, height * size)
+                self.show_bracket(screen, width * size, height * size, size)
 
-        self.show_bracket(screen, width * size, height * size)
+        self.show_bracket(screen, width * size, height * size, size)
         print("final scores")
         for p in self.players:
             print(p[0].name + ":" + str(p[1]) + " | " + str(p[2]))
@@ -61,9 +61,9 @@ class Tournament:
             game[1][1] += p2.score // 2
 
     # Show the current bracket of games played and to be played
-    def show_bracket(self, screen, width, height):
+    def show_bracket(self, screen, width, height, sq_size):
         screen.fill(background_color)
-        font = pygame.font.SysFont("monospace", 20, bold=True)
+        font = pygame.font.SysFont("monospace", (sq_size * 20)//32, bold=True)
         pos = Vector(2*width/3, height/2 - ((len(self.players)+1)/2)*30)
         text = "name : points | games"
         (dx, dy) = font.size(text)
@@ -78,16 +78,18 @@ class Tournament:
             screen.blit(font.render(text, False, k[0].color)
                         , tuple(adj_pos))
             pos += Vector(0, dy)
-        font = pygame.font.SysFont("monospace", 40, bold=True)
-        screen.blit(font.render("Press any key to continue", False, pygame.Color(255, 255, 255))
-                    , (width // 2 - 300, height - 60))
+        font = pygame.font.SysFont("monospace", (sq_size * 40)//32, bold=True)
+        text = "Press any key to continue"
+        (dx, dy0) = font.size(text)
+        screen.blit(font.render(text, False, pygame.Color(255, 255, 255))
+                    , (width // 2 - dx / 2, height - 3 * dy))
         if len(self.games) > 0:
-            font = pygame.font.SysFont("monospace", 20, bold=True)
+            font = pygame.font.SysFont("monospace", (sq_size * 20)//32, bold=True)
             game = self.games[-1]
             text = "Next game: " + str(game[0][0].name) + " vs " + str(game[1][0].name)
             (dx, dy) = font.size(text)
             screen.blit(font.render(text, False, pygame.Color(255, 255, 255))
-                        , (width // 2 - dx/2, height - 100))
+                        , (width // 2 - dx/2, height - 2 * dy - 3 * dy0))
         pygame.display.flip()
         while True:
             for event in pygame.event.get():
