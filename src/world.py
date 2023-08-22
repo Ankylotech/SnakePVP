@@ -9,7 +9,7 @@ from func_timeout import func_timeout, FunctionTimedOut
 import draw
 from snake_types import *
 
-max_speed = False
+max_speed = True
 
 
 class World:

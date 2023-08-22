@@ -7,7 +7,8 @@ from snake_types import Vector
 from world import World
 
 simulate = False
-num_rounds = 2
+num_rounds = 8
+
 
 background_color = [0, 0, 30]
 
@@ -20,10 +21,10 @@ class Tournament:
         shuffle(self.players)
         self.final = final
         self.ranked = False
-        games = list(combinations(range(len(self.players)), num_rounds))
+        games = list(combinations(range(len(self.players)), 2))
 
         games.sort(key = lambda game: game[0] - game[1])
-        self.games = [(self.players[x[0]], self.players[x[1]]) for x in games] + [(self.players[x[0]], self.players[x[1]]) for x in games]
+        self.games = [(self.players[x[0]], self.players[x[1]]) for x in games for _ in range(num_rounds)]
 
     # Play the full tournament
     def play_tournament(self, screen, clock, width, height, size):
