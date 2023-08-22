@@ -1,4 +1,3 @@
-import copy
 from random import shuffle
 import pygame
 from pygame.locals import *
@@ -6,6 +5,9 @@ from itertools import combinations
 
 from snake_types import Vector
 from world import World
+
+simulate = False
+num_rounds = 2
 
 background_color = [0, 0, 30]
 
@@ -18,19 +20,20 @@ class Tournament:
         shuffle(self.players)
         self.final = final
         self.ranked = False
-        games = list(combinations(range(len(self.players)), 2))
+        games = list(combinations(range(len(self.players)), num_rounds))
 
         games.sort(key = lambda game: game[0] - game[1])
-        self.games = [(self.players[x[0]], self.players[x[1]]) for x in games]
+        self.games = [(self.players[x[0]], self.players[x[1]]) for x in games] + [(self.players[x[0]], self.players[x[1]]) for x in games]
 
     # Play the full tournament
     def play_tournament(self, screen, clock, width, height, size):
         self.show_bracket(screen, width * size, height * size)
         while len(self.games) > 0:
             self.play_next(screen, clock, width, height, size)
-            k = len(self.players)
+            k = len(self.players) * 2
             self.players.sort(key=lambda p: (p[1]+1) * k - p[2], reverse=True)
-            self.show_bracket(screen, width * size, height * size)
+            if not simulate:
+                self.show_bracket(screen, width * size, height * size)
 
         self.show_bracket(screen, width * size, height * size)
         print("final scores")
@@ -43,7 +46,10 @@ class Tournament:
         p1 = game[0][0]
         p2 = game[1][0]
         world = World([p1, p2], width, height)
-        world.simulate_and_show(screen, clock, size)
+        if simulate:
+            world.simulate()
+        else:
+            world.simulate_and_show(screen, clock, size)
         game[0][2] += 1
         game[1][2] += 1
         if p1.score > p2.score:
